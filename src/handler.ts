@@ -70,7 +70,7 @@ async function cachedGet(cacheKey: string): Promise<any | null> {
   return response.Item?.data || null;
 }
 
-async function getWeather(planetName: string): Promise<WeatherData | undefined> {
+export async function getWeather(planetName: string): Promise<WeatherData | undefined> {
   const coords = planetCoordinates[planetName];
   if (!coords) return undefined;
 
@@ -100,7 +100,7 @@ async function getWeather(planetName: string): Promise<WeatherData | undefined> 
   }
 }
 
-async function getCharacter(id: string): Promise<CharacterData | undefined> {
+export async function getCharacter(id: string): Promise<CharacterData | undefined> {
   try {
     const cacheKey = `swapi-people-${id}`;
     const cached = await cachedGet(cacheKey);
@@ -121,7 +121,7 @@ async function getCharacter(id: string): Promise<CharacterData | undefined> {
   }
 }
 
-async function getPlanet(url: string): Promise<PlanetData | undefined> {
+export async function getPlanet(url: string): Promise<PlanetData | undefined> {
   try {
     const cacheKey = `swapi-planet-${url}`;
     const cached = await cachedGet(cacheKey);
@@ -261,8 +261,5 @@ app.use((req: Request, res: Response) => {
     error: "Not Found",
   });
 });
-export { app };
-export { getWeather };
-export { getCharacter };
-export { getPlanet };
-exports.handler = serverless(app);
+
+export const handler = serverless(app);

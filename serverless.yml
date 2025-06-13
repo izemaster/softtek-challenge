@@ -41,7 +41,18 @@ functions:
     memorySize: 128
     timeout: 5
     events:
-      - httpApi: "*"
+      - httpApi:
+          method: get
+          path: /fusionados/{id}
+      - httpApi:
+          method: get
+          path: /historial/{page}
+      - httpApi:
+          method: post
+          path: /almacenar
+      - httpApi:
+          method: get
+          path: /users/{userId}
 
 custom:
   esbuild:
