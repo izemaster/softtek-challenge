@@ -1,0 +1,94 @@
+# "org" ensures this Service is used with the correct Serverless Framework Access Key.
+org: dcestic
+# "app" enables Serverless Framework Dashboard features and sharing them with other Services.
+app: softtek-ts-app
+# "service" is the name of this project. This will also be added to your AWS resource names.
+service: softtek-ts-app
+
+stages:
+  default:
+    params:
+      tableName: "users-table-${sls:stage}"
+      fusionHistoryTableName: "fusion-history-table-${sls:stage}"
+      apiCacheTableName: "api-cache-table-${sls:stage}"
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:Query
+            - dynamodb:Scan
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+          Resource:
+            - Fn::GetAtt: [UsersTable, Arn]
+            - Fn::GetAtt: [FusionHistoryTable, Arn]
+            - Fn::GetAtt: [ApiCacheTable, Arn]
+  environment:
+    USERS_TABLE: ${param:tableName}
+    FUSION_HISTORY_TABLE: ${param:fusionHistoryTableName}
+    API_CACHE_TABLE: ${param:apiCacheTableName}
+
+functions:
+  api:
+    handler: src/handler.handler
+    memorySize: 128
+    timeout: 5
+    events:
+      - httpApi: "*"
+
+custom:
+  esbuild:
+    bundle: true
+    target: node20
+    platform: node
+    sourcemap: true
+    outdir: .build
+plugins:
+  - serverless-offline
+resources:
+  Resources:
+    UsersTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: userId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: userId
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+        TableName: ${param:tableName}
+
+    FusionHistoryTable:  
+      Type: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: fusionId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: fusionId
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+        TableName: ${param:fusionHistoryTableName}
+
+    ApiCacheTable: 
+      Type: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: cacheKey
+            AttributeType: S
+        KeySchema:
+          - AttributeName: cacheKey
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+        TableName: ${param:apiCacheTableName}
+        TimeToLiveSpecification:
+          AttributeName: ttl
+          Enabled: true
