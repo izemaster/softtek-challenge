@@ -45,7 +45,7 @@ type CompositeCharacterWeather = CharacterData & {
   }
 }
 
-async function cachePut(cacheKey: string, data: any) {
+async function cachePut(cacheKey: string, data: any): Promise<void> {
   const ttl = Math.floor(Date.now() / 1000) + 1800;
 
   await docClient.send(
@@ -263,4 +263,6 @@ app.use((req: Request, res: Response) => {
 });
 export { app };
 export { getWeather };
+export { getCharacter };
+export { getPlanet };
 exports.handler = serverless(app);
